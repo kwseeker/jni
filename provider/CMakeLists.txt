@@ -20,7 +20,7 @@ set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
 
 find_package(JNI REQUIRED)
 
-include_directories(${JNI_INCLUDE_DIRS} ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+include_directories(${JNI_INCLUDE_DIRS})
 
 include_directories(jni)
 
