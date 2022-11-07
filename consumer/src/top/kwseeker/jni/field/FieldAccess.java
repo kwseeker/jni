@@ -3,7 +3,7 @@ package top.kwseeker.jni.field;
 public class FieldAccess {
 
     static {
-        System.loadLibrary("filedAccess");
+        System.loadLibrary("fieldAccess");
     }
 
     //静态字段
@@ -23,7 +23,7 @@ public class FieldAccess {
         c.accessInstanceField();
 
         System.out.println("In Java:");
-        System.out.println("    c.s = \"" + c.s + "\"");
+        System.out.println("2   c.s = \"" + c.s + "\"");
 
         //静态字段
         FieldAccess.si = 100;

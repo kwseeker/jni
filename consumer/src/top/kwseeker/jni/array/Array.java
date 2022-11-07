@@ -22,6 +22,7 @@ public class Array {
     public static void main(String[] args) {
         Array p = new Array();
 
+        //1 固定长度数组
         int[] arr = new int[10];
         for (int i = 0; i < 10; i++) {
             arr[i] = i;

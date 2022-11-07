@@ -52,6 +52,8 @@ Java调用本地方法时，将Java参数类型转成本地方法类型，执行
 
   比如数据库驱动JDBC API其实核心也是网络通信。
 
+
+
 ## JNI开发
 
 ### 开发环境搭建 & JNI调试配置
@@ -117,7 +119,7 @@ $ProjectFileDir$
    System.loadLibrary("hello")
    ```
 
-### JNI接口定义 & 调用
+### JNI接口开发
 
 #### JNI函数定义
 
@@ -163,6 +165,8 @@ typedef jarray jdoubleArray;
 typedef jarray jobjectArray;
 ```
 
+![](imgs/JNI_Reference_Types.gif)
+
 映射表：
 
 | java    | jni header   | c/c++           | java                | jni header                                                   | c/c++           |
@@ -176,19 +180,100 @@ typedef jarray jobjectArray;
 | char    | jchar        | 同上            |                     |                                                              |                 |
 | boolean | jboolean     | 同上            |                     |                                                              |                 |
 
-**数据类型转换：**
+类型签名：
 
-相关的处理函数全部在 jni.h 中定义，实现没有搜到在哪里。
+| Type Signature            | Java Type             |
+| ------------------------- | --------------------- |
+| Z                         | boolean               |
+| B                         | byte                  |
+| C                         | char                  |
+| S                         | short                 |
+| I                         | int                   |
+| J                         | long                  |
+| F                         | float                 |
+| D                         | double                |
+| L fully-qualified-class ; | fully-qualified-class |
+| [ type                    | type[]                |
+| ( arg-types ) ret-type    | method type           |
 
-```c
-// jni jstring -> c char*
-char *inCStr = (*env)->GetStringUTFChars(env, inJNIStr, NULL);
-(*env)->ReleaseStringUTFChars(env, inJNIStr, inCStr);	//还要释放资源
-// c char* -> jni jstring
-jstring outJNIStr = (*env)->NewStringUTF(env, outCStr);
+比如：`long f (int n, String s, int[] arr);` 的类型签名　`(ILjava/lang/String;[I)J `。
 
-
+```java
+long f (int n, String s, int[] arr);
+	  ( I      Ljava/lang/String; [I ) J
 ```
+
+#### 数据类型转换
+
+Java传参进入到JNI先转成了"j"开头的数据类型，对于JNI基本数据类型C/C++可以直接使用，非基本类型需要转成C/C++类型；然后才能处理，处理完成后还要转回JNI数据类型，然后再转成Java本地方法返回类型。
+
+相关的处理函数（都是函数指针）全部在 jni.h 中定义，但是没有搜到函数实现在哪里。
+
+官网上关于这些函数的简单说明，参考 [JNI Functions](https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html) 。
+
+这些函数的使用方法感觉和反射有些像。
+
+1. **字符串 jstring <---> char*/string**
+
+   ```c
+   // jni jstring -> c char*
+   char *inCStr = (*env)->GetStringUTFChars(env, inJNIStr, NULL);	//返回指向字节数组的指针，以修改后的UTF-8编码表示。
+   (*env)->ReleaseStringUTFChars(env, inJNIStr, inCStr);			//还要释放资源
+   // c char* -> jni jstring
+   jstring outJNIStr = (*env)->NewStringUTF(env, outCStr);
+   ```
+
+2. **数组**
+
+   基本类型数组、对象数组。
+
+   ```c
+   // jintArray -> jint[]
+   jint buf[10];
+   (*env)->GetIntArrayRegion(env, array, 0, 10, buf);
+   // jintArray -> jint*
+   jint *cArr = (*env)->GetIntArrayElements(env, array, NULL);
+   (*env)->ReleaseIntArrayElements(env, array, cArr, 2);
+   
+   //创建　jobjectArray
+   jobjectArray result = (*env)->NewObjectArray(env, size, intArrCls, NULL);
+   //创建　jintArray
+   jintArray iArr = (*env)->NewIntArray(env, size);
+   ```
+
+#### 访问JVM字段和方法
+
+访问实例字段、静态字段，调用实例方法、静态方法、父类实例方法、构造方法。
+
+上面操作需要获取字段ID和方法ID，需要对其进行检索，检索操作可以使用缓存优化，降低性能损耗。
+
+
+
+#### JNI的三种引用
+
+局部引用、全局引用、弱全局引用。
+
+
+
+#### 异常检查与处理
+
+
+
+#### 调用接口
+
+
+
+#### JNI多线程
+
+
+
+#### 简单封装已有的本地库
+
+一对一映射、Shared Stubs、Peer传递数据结构。
+
+
+
+### 使用JNI易错避坑指南
 
 
 
