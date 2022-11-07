@@ -78,6 +78,14 @@ set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
 
 调试的话，IDEA开启调试模式，然后将CLion调试器关联到Java进程即可（搜索 “Attach to Process ...”）。
 
+一键生成本地方法头文件（External Tools配置）：
+
+```tex
+$JDKPath$/bin/javah
+-jni -classpath $OutputPath$ -d ./jni $FileClass$
+$ProjectFileDir$
+```
+
 ### JNI开发流程
 
 1. 创建一个 Java 类声明本地方法；
