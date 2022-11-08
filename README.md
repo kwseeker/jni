@@ -1,5 +1,12 @@
 # JNI 编程指南
 
+> **Tips**：
+>
+> + JNI 编程和 Java 反射代码风格很像，类比反射学习JNI很容易适应JNI代码的编写。
+> + 注意 JNI 函数名命名规范，从命名上很容易猜出函数的作用。
+
+
+
 ## JNI的作用
 
 用于支持调用本地代码（本地代码个人理解应该是指的平台相关的代码，即系统本地提供的底层能力的接口等），通过调用本地代码克服一些内存管理、性能问题以及借用底层能力。
@@ -246,6 +253,37 @@ Java传参进入到JNI先转成了"j"开头的数据类型，对于JNI基本数�
 访问实例字段、静态字段，调用实例方法、静态方法、父类实例方法、构造方法。
 
 上面操作需要获取字段ID和方法ID，需要对其进行检索，检索操作可以使用缓存优化，降低性能损耗。
+
+**访问字段的函数**：
+
+
+
+**调用方法的函数**：
+
+函数格式：
+
+```C
+j<Type> (JNICALL *Call[Static][Nonvirtual]<JavaType>Method[V/A]) 
+    (JNIEnv *env, jobject obj, jmethodID methodID, [.../va_list args/jvalue *args]);
+// j<Type>				返回值类型， 比如：jlong
+// [Static]				   表明是调用静态方法
+// [Nonvirtual]		表明调用父类方法 
+// <JavaType>， 比如：Double
+// 三种传参方式：
+// 1) ... 						动态参数
+// 2) va_list args	
+// 3) jvalue *args	联合体指针
+
+//比如调用无参无返回值的方法的函数
+void (JNICALL *CallVoidMethod)
+    (JNIEnv *env, jobject obj, jmethodID methodID, ...);
+void (JNICALL *CallVoidMethodV)
+    (JNIEnv *env, jobject obj, jmethodID methodID, va_list args);
+void (JNICALL *CallVoidMethodA)
+    (JNIEnv *env, jobject obj, jmethodID methodID, const jvalue * args);    
+```
+
+
 
 
 

@@ -29,7 +29,23 @@ JNIEXPORT void JNICALL Java_top_kwseeker_jni_method_MethodCall_nativeMethod
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_top_kwseeker_jni_method_MethodCall_nativeStaticMethod
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     top_kwseeker_jni_method_MethodCall
+ * Method:    nativeCallPMethod
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_top_kwseeker_jni_method_MethodCall_nativeCallPMethod
   (JNIEnv *, jobject);
+
+/*
+ * Class:     top_kwseeker_jni_method_MethodCall
+ * Method:    nativeNewString
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_top_kwseeker_jni_method_MethodCall_nativeNewString
+  (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }
