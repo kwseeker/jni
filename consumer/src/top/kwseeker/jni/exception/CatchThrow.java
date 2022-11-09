@@ -3,7 +3,7 @@ package top.kwseeker.jni.exception;
 public class CatchThrow {
 
     static {
-        System.loadLibrary("CatchThrow");
+        System.loadLibrary("family");
     }
 
     private native void doIt() throws IllegalArgumentException;

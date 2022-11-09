@@ -75,6 +75,12 @@ Java调用本地方法时，将Java参数类型转成本地方法类型，执行
 
 用的 IDEA + Clion CMake 的方式，搭建教程网上随便搜，主要是可能需要了解下CMake的使用，以及CMakeLists的编写。
 
+> [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html) (CMake官方文档)
+>
+> [CMake Cookbook中文版](https://www.bookstack.cn/books/CMake-Cookbook)
+>
+> [CMAKE TUTORIAL (YouTube)](https://www.youtube.com/playlist?list=PLalVdRk2RC6o5GHu618ARWh0VO0bFlif4)
+
 配置CMake的时候遇到了个坑，就是本地环境变量明明配置了JAVA_HOME，但是 $ENV{JAVA_HOME} 的识别还是为空，最后只能手动再set一下。
 
 ```cmake
@@ -360,11 +366,42 @@ void (JNICALL *CallVoidMethodA)
 
 #### 异常检查与处理
 
+异常检查
 
+```c
+jthrowable (JNICALL *ExceptionOccurred) (JNIEnv *env);
+jboolean (JNICALL *ExceptionCheck) (JNIEnv *env);
+```
+
+打印异常和堆栈信息
+
+```c
+void (JNICALL *ExceptionDescribe) (JNIEnv *env);
+```
+
+清除异常信息
+
+```c
+ void (JNICALL *ExceptionClear) (JNIEnv *env);
+```
+
+将检测的异常再次抛出
+
+```c
+jint (JNICALL *Throw) (JNIEnv *env, jthrowable obj)
+```
+
+抛出指定类型的异常
+
+```c
+jint (JNICALL *ThrowNew) (JNIEnv *env, jclass clazz, const char *msg);
+```
 
 #### 调用接口
 
+本地应用程序创建或链接JVM，调用Java接口。
 
+看官网吧，[The Invocation API](https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/invocation.html#wp15956) 。
 
 #### JNI多线程
 
@@ -377,8 +414,6 @@ void (JNICALL *CallVoidMethodA)
 
 
 ### 使用JNI易错避坑指南
-
-
 
 
 
