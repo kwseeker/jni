@@ -1,5 +1,13 @@
 # JNI 编程指南
 
+JNI相关内容：
+
++ JNIGI 
+
+  Java Native Interface Golang Interface。
+
+  可以实现 Java 和 GO 的互相调用。
+
 > **Tips**：
 >
 > + JNI 编程和 Java 反射代码风格很像，类比反射学习JNI很容易适应JNI代码的编写。
@@ -254,15 +262,60 @@ Java传参进入到JNI先转成了"j"开头的数据类型，对于JNI基本数�
 
 上面操作需要获取字段ID和方法ID，需要对其进行检索，检索操作可以使用缓存优化，降低性能损耗。
 
+**缓存的方法：**
+
++ 全局变量
+
+  ```c
+  //使用全局变量缓存方法ID
+  jmethodID MID_InstanceMethodCall_callback;
+  jmethodID MID_StaticMethodCall_staticCallback;
+  ```
+
++ 静态局部变量
+
+  使用了C语言静态局部变量在函数执行完毕后不会释放，下次再进入这个函数维持上次函数结束时的值的特性。
+
+  ```
+  
+  static jfieldID fid_s;
+  ```
+
+> C语言 全局变量、静态全局变量、静态局部变量的区别
+>
+> 全局变量的作用域是整个源程序；
+>
+> 静态全局变量的作用域是本源文件；
+>
+> 静态局部变量的作用域仍然是函数块，但是从原来的栈中存放改为静态存储区（下图的全局数据区静态变量）存放，函数退出数据也不会释放。
+>
+> ![](imgs/C内存模型.jpeg)
+
 **访问字段的函数**：
 
+函数格式：
 
+```c
+//获取字段ID，好比java反射获取Field对象
+jfieldID (JNICALL *GetFieldID)
+    (JNIEnv *env, jclass clazz, const char *name, const char *sig);
+//Getter
+j<Type> (JNICALL *Get<JavaObject>Field)
+    (JNIEnv *env, jobject obj, jfieldID fieldID);
+//Setter
+void (JNICALL *Set<JavaType>Field)
+      (JNIEnv *env, jobject obj, jfieldID fieldID, j<Type> val);
+```
 
 **调用方法的函数**：
 
 函数格式：
 
 ```C
+//获取方法ID，好比java反射获取Method对象
+jmethodID (JNICALL *GetStaticMethodID)
+      (JNIEnv *env, jclass clazz, const char *name, const char *sig);
+//调用方法
 j<Type> (JNICALL *Call[Static][Nonvirtual]<JavaType>Method[V/A]) 
     (JNIEnv *env, jobject obj, jmethodID methodID, [.../va_list args/jvalue *args]);
 // j<Type>				返回值类型， 比如：jlong
@@ -283,15 +336,27 @@ void (JNICALL *CallVoidMethodA)
     (JNIEnv *env, jobject obj, jmethodID methodID, const jvalue * args);    
 ```
 
-
-
-
-
 #### JNI的三种引用
 
-局部引用、全局引用、弱全局引用。
+局部引用、全局引用、弱全局引用区别：
 
+它们都属于JVM管理。
 
+局部引用只在创建它的本地方法返回前有效；只在创建它的线程中有效，不可跨线程使用；本地方法返回后局部引用会自动释放；不能将局部引用保存到静态变量中缓存，一样会被释放，然后导致访问无效。
+
+局部引用会阻止它所引用的对象被GC回收；
+
+全局引用和弱全局引用，可以跨方法、跨线程使用，直到他被手动释放才失效；
+
+全局引用会阻止它所引用的对象被GC回收；
+
+弱全局引用不会阻止它所引用的对象被GC回收；
+
+> 关于为何局部引用在本地方法返回后会被自动释放还要手动调用 DeleteLocalRef 释放？
+>
+> 官网举了个例子（使用大数组对象迭代）：
+>
+> **Note**: JDK/JRE 1.1 provides the `DeleteLocalRef` function above so that programmers can manually delete local references. For example, if native code iterates through a potentially large array of objects and uses one element in each iteration, it is a good practice to delete the local reference to the no-longer-used array element before a new local reference is created in the next iteration. As of JDK/JRE 1.2 an additional set of functions are provided for local reference lifetime management. They are the four functions listed below.
 
 #### 异常检查与处理
 

@@ -1,7 +1,7 @@
 #include "top_kwseeker_jni_method_MethodCall.h"
 #include <jni.h>
 
-//
+//使用全局变量缓存方法ID
 jmethodID MID_InstanceMethodCall_callback;
 jmethodID MID_StaticMethodCall_staticCallback;
 
